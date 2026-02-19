@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>marks</title>
+</head>
+<body>
+    {% if user %}
+        <button onclick="addMark()">create</button>
+        <button onclick="searchMarks()">search</button>
+        <button onclick="refreshMarks()">refresh</button>
+        <button onclick="signOut()">sign out</button>
+        <div id="marks"></div>
+    {% else %}
+        <p>marks is a downright horrible note-taking app made for slushies</p>
+        <p>you can <a href="/auth/signup">sign up</a> or <a href="/auth/signin">sign in</a></p>
+    {% endif %}
+
+    <script>
+        (async function () {
+            const user = {{ user|tojson }};
+            console.log(user);
+            if (!user) return;
+
+            async function refreshMarks() {
+                fetchMarks();
+            }
+
+            window.refreshMarks = refreshMarks;
+
+            async function addMark() {
+                let body = prompt("watchu wanna say?");
+                if (!body) return;
+                let res = await fetch('/marks/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({body})
+                })
+                if (res.ok){
+                    fetchMarks();
+                } else {
+                    alert('could not create mark, try signing in again');
+                    await signOut();
+                }
+            }
+
+            window.addMark = addMark;
+
+            async function searchMarks() {
+                let query = prompt("search marks for...");
+                if (!query) return;
+                let marksDiv = document.getElementById('marks');
+                marksDiv.innerHTML = 'searching...';
+                let res = await fetch(`/marks/search?query=${encodeURIComponent(query)}`);
+                if (!res.ok){
+                    alert('could not search marks, try signing in again');
+                    await signOut();
+                    return;
+                }
+                let data = await res.json();
+                marksDiv.innerHTML = '';
+                data.forEach(mark => {
+                    createMark(mark.body, mark.id);
+                });
+            }
+
+            window.searchMarks = searchMarks;
+
+            async function editMark(id) {
+                let markEll = document.querySelector(`[data-id="${id}"]`);
+                let p = markEll.querySelector('p');
+                p.contentEditable = true;
+                p.focus();
+                p.addEventListener('blur', async function onBlur() {
+                    p.contentEditable = false;
+                    let res = await fetch('/marks/edit', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id, body: p.textContent
+                        })
+                    })
+                })
+            }
+
+            async function deleteMark(id) {
+                let res = await fetch('/marks/delete', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({id})
+                })
+                if (res.ok){
+                    let markEl = document.querySelector(`[data-id="${id}"]`);
+                    markEl.remove();
+                } else {
+                    alert('could not delete mark, try signing in again');
+                    await signOut();
+                }
+            }
+
+            async function createMark(body, id) {
+                let marksDiv = document.getElementById('marks');
+                let markEl = document.createElement('div');
+                let p = document.createElement('p');
+                p.textContent = body;
+
+                let editBtn = document.createElement('button');
+                editBtn.textContent = "edit";
+                editBtn.addEventListener("click", () => editMark(id));
+
+                let delBtn = document.createElement('button');
+                delBtn.textContent = "delete";
+                delBtn.addEventListener("click", () => deleteMark(id));
+
+                markEl.appendChild(p);
+                markEl.appendChild(editBtn);
+                markEl.appendChild(delBtn);
+                markEl.dataset.id = id;
+                marksDiv.appendChild(markEl);
+            }
+
+            async function signOut() {
+                let res = await fetch('/auth/signout', {
+                    method: 'POST'
+                })
+                if (res.ok){
+                    window.location.href = '/';
+                } else {
+                    console.log("huh 😭😭")
+                }
+            }
+
+            window.signOut = signOut;
+
+            async function fetchMarks() {
+                let marksDiv = document.getElementById('marks');
+                marksDiv.innerHTML = 'loading marks...';
+                let res = await fetch('/marks/view');
+                if (!res.ok){
+                    alert('could not fetch marks, try signing in again');
+                    await signOut();
+                    return;
+                }
+                let data = await res.json();
+                marksDiv.innerHTML = '';
+                data.forEach(mark => {
+                    createMark(mark.body, mark.id);
+                })
+            }
+
+            fetchMarks();
+        })()
+    </script>
+</body>
+</html>

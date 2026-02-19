@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 from flask_bcrypt import Bcrypt
 from flask import session
 import csv
@@ -6,8 +6,10 @@ import csv
 auth_bp = Blueprint('auth', __name__)
 bcrypt = Bcrypt()
 
-@auth_bp.route('/signup', methods=['POST'])
+@auth_bp.route('/signup', methods=['GET','POST'])
 def signup():
+    if request.method == 'GET':
+        return render_template('signup.html')
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
@@ -31,8 +33,10 @@ def signup():
         "file": "https://raw.githubusercontent.com/tanmayrajk/slushies/refs/heads/main/memes/bro-is-new.jpg"
     }), 201
 
-@auth_bp.route('/signin', methods=['POST'])
+@auth_bp.route('/signin', methods=['GET','POST'])
 def signin():
+    if request.method == 'GET':
+        return render_template('signin.html')
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
@@ -51,3 +55,11 @@ def signin():
                         "error": "try that one more time and you getting slimed 😒😒",
                         "file": "https://raw.githubusercontent.com/tanmayrajk/slushies/refs/heads/main/memes/kevinhart.gif"
                     }), 401
+
+@auth_bp.route('/signout', methods=['POST'])
+def signout():
+    session.pop("user", None)
+    return jsonify({
+        "message": "it-it's not like im gonna miss you or anything... b-baka! >.<",
+        "file": "illaddthislater"
+    })

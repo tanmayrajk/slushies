@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template, session
 from flask_bcrypt import Bcrypt
 from auth import auth_bp
 from marks import marks_bp
@@ -16,7 +16,7 @@ if not os.path.exists("users.csv"):
 
 @app.route('/')
 def home():
-    return 'hello world'
+    return render_template('index.html', user=session.get("user"))
 
 app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(marks_bp, url_prefix='/marks')

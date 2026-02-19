@@ -12,20 +12,26 @@ def create_mark():
         return "mf ion even know you 😭😭", 401
     data = request.get_json()
     mark_body = data.get('body')
+    mark_id = str(uuid.uuid4())
+    mark_timestamp = int(time.time())
     if not mark_body:
         return "no body", 400
-    with open(f'marks_db/{session["user"]}.csv', 'a', newline='') as markfile:
+    with open(f'marks_db/{session["user"]}.csv', 'a', newline='', encoding="utf-8") as markfile:
         writer = csv.DictWriter(markfile, fieldnames=['id', 'timestamp','body'])
-        writer.writerow({'id': str(uuid.uuid4()), 'timestamp': int(time.time()), 'body': mark_body})
+        writer.writerow({'id': mark_id, 'timestamp': mark_timestamp, 'body': mark_body})
     
-    return "mark created", 201
+    return jsonify({
+        "body": mark_body,
+        "id": mark_id,
+        "timestamp": mark_timestamp,
+    })
 
 @marks_bp.route('/view', methods=['GET'])
 def view_marks():
     if "user" not in session:
         return "mf ion even know you 😭😭", 401
     marks = []
-    with open(f'marks_db/{session["user"]}.csv', 'r') as markfile:
+    with open(f'marks_db/{session["user"]}.csv', 'r', encoding="utf-8") as markfile:
         reader = csv.DictReader(markfile)
         for row in reader:
             marks.append({
@@ -33,6 +39,7 @@ def view_marks():
                 "timestamp": int(row['timestamp']),
                 "body": row['body'],
             })
+    marks.sort(key=lambda x: x['timestamp'], reverse=True)
     return jsonify(marks)
 
 @marks_bp.route('/delete', methods=['DELETE'])
@@ -45,12 +52,12 @@ def delete_mark():
         return "what mark brah", 400
     
     marks = []
-    with open(f'marks_db/{session["user"]}.csv', 'r') as markfile:
+    with open(f'marks_db/{session["user"]}.csv', 'r', encoding="utf-8") as markfile:
         reader = csv.DictReader(markfile)
         for row in reader:
             if row['id'] != mark_id:
                 marks.append(row)
-    with open(f'marks_db/{session["user"]}.csv', 'w', newline='') as markfile:
+    with open(f'marks_db/{session["user"]}.csv', 'w', newline='', encoding="utf-8") as markfile:
         writer = csv.DictWriter(markfile, fieldnames=['id', 'timestamp','body'])
         writer.writeheader()
         for mark in marks:
@@ -65,7 +72,7 @@ def search_marks():
     if not query:
         return "how you gonna find nothing brah", 400
     results = []
-    with open(f'marks_db/{session["user"]}.csv', 'r') as markfile:
+    with open(f'marks_db/{session["user"]}.csv', 'r', encoding="utf-8") as markfile:
         reader = csv.DictReader(markfile)
         for row in reader:
             if query in row['body']:
@@ -74,6 +81,7 @@ def search_marks():
                     "timestamp": int(row['timestamp']),
                     "body": row["body"],
                 })
+    results.sort(key=lambda x: x['timestamp'], reverse=True)
     return jsonify(results)
 
 @marks_bp.route('/edit', methods=['PUT'])
@@ -86,13 +94,13 @@ def edit_mark():
     if not mark_id:
         return "what mark brah", 400
     marks = []
-    with open(f'marks_db/{session["user"]}.csv', 'r') as markfile:
+    with open(f'marks_db/{session["user"]}.csv', 'r', encoding="utf-8") as markfile:
         reader = csv.DictReader(markfile)
         for row in reader:
             if row['id'] == mark_id:
                 row['body'] = new_body
             marks.append(row)
-    with open(f'marks_db/{session["user"]}.csv', 'w', newline='') as markfile:
+    with open(f'marks_db/{session["user"]}.csv', 'w', newline='', encoding="utf-8") as markfile:
         writer = csv.DictWriter(markfile, fieldnames=['id', 'timestamp','body'])
         writer.writeheader()
         for mark in marks:

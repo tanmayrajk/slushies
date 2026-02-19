@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sign in - marks</title>
+</head>
+<body>
+    <h2>sign in to marks</h2>
+    <form>
+        <label for="username">username:</label><br>
+        <input type="text" id="username" name="username"><br>
+        <label for="password">password:</label><br>
+        <input type="password" id="password" name="password"><br><br>
+        <input type="submit" value="sign in">
+    <script>
+        var form = document.querySelector('form');
+        form.addEventListener('submit', async function(e){
+            e.preventDefault();
+            let username = document.getElementById('username').value;
+            let password = document.getElementById('password').value;
+            let res = await fetch('/auth/signin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username, password
+                })
+            })
+
+            if (res.ok){
+                window.location.href = '/';
+            } else {
+                alert('ts wrong mane');
+            }
+        })
+    </script>
+</body>
+</html>
