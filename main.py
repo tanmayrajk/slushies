@@ -12,6 +12,7 @@ app.config.update(
     SESSION_COOKIE_SECURE=True,
     SESSION_COOKIE_SAMESITE="None"
 )
+app.config['SESSION_COOKIE_DOMAIN'] = None
 
 bcrypt = Bcrypt(app)
 
