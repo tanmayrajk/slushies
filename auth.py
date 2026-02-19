@@ -8,26 +8,24 @@ bcrypt = Bcrypt()
 
 @auth_bp.route('/signup', methods=['GET','POST'])
 def signup():
+    users = auth_bp.users
     if request.method == 'GET':
         return render_template('signup.html')
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-    with open('users.csv', 'r') as userfile:
-        reader = csv.DictReader(userfile)
-        for row in reader:
-            if row['username'] == username:
-                return jsonify({
-                    "error": "unoriginal ass mf 🫩",
-                    "file": "https://raw.githubusercontent.com/tanmayrajk/slushies/refs/heads/main/memes/buzz-lightyear-factory.gif"
-                }), 400
-    with open('users.csv', 'a', newline='') as userfile:
-        writer = csv.writer(userfile)
-        writer.writerow([username, hashed_password])
-    with open(f'marks_db/{username}.csv', 'w', newline='') as markfile:
-        writer = csv.writer(markfile)
-        writer.writerow(['id', 'timestamp', 'body'])
+    existing_user = users.find_one({"username": username})
+    if existing_user:
+        return jsonify({
+            "error": "unoriginal ass mf 🫩",
+            "file": "https://raw.githubusercontent.com/tanmayrajk/slushies/refs/heads/main/memes/buzz-lightyear-factory.gif"
+        }), 400
+    
+    users.insert_one({
+        "username": username,
+        "password": hashed_password
+    })
     return jsonify({
         "message": "you a yn now",
         "file": "https://raw.githubusercontent.com/tanmayrajk/slushies/refs/heads/main/memes/bro-is-new.jpg"
@@ -40,21 +38,18 @@ def signin():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
-    with open('users.csv', 'r') as userfile:
-        reader = csv.DictReader(userfile)
-        for row in reader:
-            if row['username'] == username:
-                if bcrypt.check_password_hash(row['password'], password):
-                    session["user"] = username
-                    return jsonify({
-                        "message": "welcome cuh",
-                        "file": "https://raw.githubusercontent.com/tanmayrajk/slushies/refs/heads/main/memes/yn.jpg"
-                    }), 200
-                else:
-                    return jsonify({
-                        "error": "try that one more time and you getting slimed 😒😒",
-                        "file": "https://raw.githubusercontent.com/tanmayrajk/slushies/refs/heads/main/memes/kevinhart.gif"
-                    }), 401
+    user = auth_bp.users.find_one({"username": username})
+    if user and bcrypt.check_password_hash(user['password'], password):
+        session["user"] = username
+        return jsonify({
+            "message": "welcome cuh",
+            "file": "https://raw.githubusercontent.com/tanmayrajk/slushies/refs/heads/main/memes/yn.jpg"
+        }), 200
+    else:
+        return jsonify({
+            "error": "try that one more time and you getting slimed 😒😒",
+            "file": "https://raw.githubusercontent.com/tanmayrajk/slushies/refs/heads/main/memes/kevinhart.gif"
+        }), 401
 
 @auth_bp.route('/signout', methods=['POST'])
 def signout():

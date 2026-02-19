@@ -4,9 +4,21 @@ from auth import auth_bp
 from marks import marks_bp
 import os, csv
 from werkzeug.middleware.proxy_fix import ProxyFix
+from pymongo import MongoClient
+from dotenv import load_dotenv
+
+load_dotenv()
+
+client = MongoClient(os.environ.get("MONGO_URI"))
+db = client['slushify']
+
+users_collection = db['users']
+marks_collection = db['marks']
+
+marks_collection.create_index([("body", "text")])
 
 app = Flask(__name__)
-app.secret_key = 'crazy?iwascrazyonce.theylockedmeinaroom.arubberroom.arubberroomwithrats.andratsmakemecrazy.'
+app.secret_key = os.environ.get("SECRET_KEY", "supersecretkey")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 app.config.update(
     SESSION_COOKIE_SECURE=True,
@@ -24,6 +36,9 @@ if not os.path.exists("users.csv"):
 @app.route('/')
 def home():
     return render_template('index.html', user=session.get("user"))
+
+auth_bp.users = users_collection
+marks_bp.marks = marks_collection
 
 app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(marks_bp, url_prefix='/marks')
