@@ -22,4 +22,4 @@ app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(marks_bp, url_prefix='/marks')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=os.environ.get("PORT", 5000))
+    app.run(debug=True, port=int(os.environ.get("PORT", 5000)))
