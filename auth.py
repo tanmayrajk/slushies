@@ -25,7 +25,7 @@ def signup():
         writer.writerow([username, hashed_password])
     with open(f'marks_db/{username}.csv', 'w', newline='') as markfile:
         writer = csv.writer(markfile)
-        writer.writerow(['id','url', 'tags'])
+        writer.writerow(['id', 'timestamp', 'body', 'tags'])
     return jsonify({
         "message": "you a yn now",
         "file": "https://raw.githubusercontent.com/tanmayrajk/slushies/refs/heads/main/memes/bro-is-new.jpg"
