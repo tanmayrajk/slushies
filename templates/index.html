@@ -35,6 +35,7 @@
                 if (!body) return;
                 let res = await fetch('/marks/create', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -55,7 +56,9 @@
                 if (!query) return;
                 let marksDiv = document.getElementById('marks');
                 marksDiv.innerHTML = 'searching...';
-                let res = await fetch(`/marks/search?query=${encodeURIComponent(query)}`);
+                let res = await fetch(`/marks/search?query=${encodeURIComponent(query)}`, {
+                    credentials: 'include'
+                });
                 if (!res.ok){
                     alert('could not search marks, try signing in again');
                     await signOut();
@@ -79,6 +82,7 @@
                     p.contentEditable = false;
                     let res = await fetch('/marks/edit', {
                         method: 'PUT',
+                        credentials: 'include',
                         headers: {
                             'Content-Type': 'application/json'
                         },
@@ -92,6 +96,7 @@
             async function deleteMark(id) {
                 let res = await fetch('/marks/delete', {
                     method: 'DELETE',
+                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -133,7 +138,8 @@
 
             async function signOut() {
                 let res = await fetch('/auth/signout', {
-                    method: 'POST'
+                    method: 'POST',
+                    credentials: 'include'
                 })
                 if (res.ok){
                     window.location.href = '/';
@@ -147,7 +153,9 @@
             async function fetchMarks() {
                 let marksDiv = document.getElementById('marks');
                 marksDiv.innerHTML = 'loading marks...';
-                let res = await fetch('/marks/view');
+                let res = await fetch('/marks/view', {
+                    credentials: 'include'
+                });
                 if (!res.ok){
                     alert('could not fetch marks, try signing in again');
                     await signOut();
