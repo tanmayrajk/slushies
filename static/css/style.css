@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'JetBrains Mono', monospace;
+    background-color: #1e1e1e;
+    color: #f0f0f0;
+    margin: 20px;
+}
+
+a {
+    color: #61dafb;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: wavy underline;
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+input, textarea {
+    width: 20rem;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border: 1px solid #333;
+    background-color: #2e2e2e;
+    color: #f0f0f0;
+}
+
+input[type="submit"] {
+    padding: 10px 20px;
+    background-color: #61dafb;
+    font-weight: 600;
+    border: none;
+    color: #1e1e1e;
+    cursor: pointer;
+}
+
+input[type="submit"]:hover {
+    background-color: #21a1f1;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #2e2e2e;
+    font-weight: 600;
+    border: none;
+    color: #f0f0f0;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #444;
+}
+
+#marks {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.btn-container button {
+    background-color: #444;
+}
+
+.btn-container button:hover {
+    background-color: #555;
+}
+
+.mark {
+    padding: 15px;
+    background-color: #2e2e2e;
+    position: relative;
+}
