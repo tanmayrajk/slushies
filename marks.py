@@ -12,15 +12,11 @@ def create_mark():
         return "mf ion even know you 😭😭", 401
     data = request.get_json()
     mark_body = data.get('body')
-    mark_tags = data.get('tags')
     if not mark_body:
         return "no body", 400
-    if type(mark_tags) != list:
-        return "make ts a list brah", 400
-    
     with open(f'marks_db/{session["user"]}.csv', 'a', newline='') as markfile:
-        writer = csv.DictWriter(markfile, fieldnames=['id', 'timestamp','body', 'tags'])
-        writer.writerow({'id': str(uuid.uuid4()), 'timestamp': int(time.time()), 'body': mark_body, 'tags': ",".join(mark_tags)})
+        writer = csv.DictWriter(markfile, fieldnames=['id', 'timestamp','body'])
+        writer.writerow({'id': str(uuid.uuid4()), 'timestamp': int(time.time()), 'body': mark_body})
     
     return "mark created", 201
 
@@ -36,7 +32,6 @@ def view_marks():
                 "id": row['id'],
                 "timestamp": int(row['timestamp']),
                 "body": row['body'],
-                "tags": row['tags'].split(",") if row['tags'] else []
             })
     return jsonify(marks)
 
@@ -56,7 +51,7 @@ def delete_mark():
             if row['id'] != mark_id:
                 marks.append(row)
     with open(f'marks_db/{session["user"]}.csv', 'w', newline='') as markfile:
-        writer = csv.DictWriter(markfile, fieldnames=['id', 'timestamp','body', 'tags'])
+        writer = csv.DictWriter(markfile, fieldnames=['id', 'timestamp','body'])
         writer.writeheader()
         for mark in marks:
             writer.writerow(mark)
@@ -73,12 +68,11 @@ def search_marks():
     with open(f'marks_db/{session["user"]}.csv', 'r') as markfile:
         reader = csv.DictReader(markfile)
         for row in reader:
-            if query in row['body'] or query in row['tags']:
+            if query in row['body']:
                 results.append({
                     "id": row['id'],
                     "timestamp": int(row['timestamp']),
                     "body": row["body"],
-                    "tags": row["tags"].split(",") if row["tags"] else []
                 })
     return jsonify(results)
 
@@ -88,22 +82,18 @@ def edit_mark():
         return "mf ion even know you 😭😭", 401
     data = request.get_json()
     mark_id = data.get('id')
-    new_tags = data.get('tags')
     new_body = data.get('body')
     if not mark_id:
         return "what mark brah", 400
-    if type(new_tags) != list:
-        return "make ts a list brah", 400
     marks = []
     with open(f'marks_db/{session["user"]}.csv', 'r') as markfile:
         reader = csv.DictReader(markfile)
         for row in reader:
             if row['id'] == mark_id:
-                row['tags'] = ",".join(new_tags)
                 row['body'] = new_body
             marks.append(row)
     with open(f'marks_db/{session["user"]}.csv', 'w', newline='') as markfile:
-        writer = csv.DictWriter(markfile, fieldnames=['id', 'timestamp','body', 'tags'])
+        writer = csv.DictWriter(markfile, fieldnames=['id', 'timestamp','body'])
         writer.writeheader()
         for mark in marks:
             writer.writerow(mark)
