@@ -3,9 +3,15 @@ from flask_bcrypt import Bcrypt
 from auth import auth_bp
 from marks import marks_bp
 import os, csv
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 app = Flask(__name__)
 app.secret_key = 'crazy?iwascrazyonce.theylockedmeinaroom.arubberroom.arubberroomwithrats.andratsmakemecrazy.'
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_SAMESITE="None"
+)
 
 bcrypt = Bcrypt(app)
 
